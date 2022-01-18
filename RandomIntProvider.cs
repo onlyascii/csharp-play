@@ -1,4 +1,7 @@
-﻿namespace Architecture
+﻿using System;
+using System.Collections.Generic;
+
+namespace Architecture
 {
     public class RandomIntProvider : IDataProvider<int>
     {
@@ -6,10 +9,10 @@
         private readonly int _count;
         private readonly Random _random;
 
-        public RandomIntProvider(int maxValue, int count)
+        public RandomIntProvider(IConfig config)
         {
-            _maxValue = maxValue;
-            _count = count;
+            _maxValue = config.MaxRandomInt;
+            _count = config.RandomIntCount;
             _random = new Random();
         }
 

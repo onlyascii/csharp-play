@@ -4,9 +4,9 @@
     {
         private readonly int _constantValue;
 
-        public ConstantMultiplier(int constantValue)
+        public ConstantMultiplier(IConfig config)
         {
-            _constantValue = constantValue;
+            _constantValue = config.ConstantValue;
         }
 
         public int Manipulate(int data)
