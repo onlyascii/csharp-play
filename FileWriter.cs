@@ -10,9 +10,9 @@ namespace Architecture
         private readonly StreamWriter _streamWriter;
         private readonly ILogger _logger;
 
-        public FileWriter(IConfig config, ILogger logger)
+        public FileWriter(IOptions options, ILogger logger)
         {
-            _fileName = config.FileWriterDestination;
+            _fileName = options.FileWriterDestination;
             _fileStream = new FileStream(_fileName, FileMode.OpenOrCreate);
             _streamWriter = new StreamWriter(_fileStream);
             _logger = logger;

@@ -9,10 +9,10 @@ namespace Architecture
         private readonly int _count;
         private readonly Random _random;
 
-        public RandomIntProvider(IConfig config)
+        public RandomIntProvider(IOptions options)
         {
-            _maxValue = config.MaxRandomInt;
-            _count = config.RandomIntCount;
+            _maxValue = options.MaxRandomInt;
+            _count = options.RandomIntCount;
             _random = new Random();
         }
 

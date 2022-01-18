@@ -1,9 +1,30 @@
 ﻿using System;
-using Microsoft.Extensions.Configuration;
+using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Architecture
 {
+    public interface IOptions 
+    {
+        public string FileWriterDestination { get; }
+        public int MaxRandomInt { get; }
+        public int RandomIntCount { get; }
+        public int ConstantValue { get; }
+
+
+    }
+    public class Options : IOptions
+    {
+        [Option('f', "filename", Required = false, Default = "file.txt", HelpText ="filename to write to")]
+        public string FileWriterDestination { get; set; }
+        [Option('r', "max", Required = false, Default = 5000, HelpText ="max random number")]
+        public int MaxRandomInt { get; set; }
+        [Option('c', "count", Required = false, Default = 20, HelpText ="numbers to process")]
+        public int RandomIntCount { get; set; }
+        [Option('v', "constant", Required = false, Default = 100, HelpText ="value to multiply by")]
+        public int ConstantValue { get; set; }
+
+    }
     class Processor
     {
         private readonly IDataProvider<int> _dataProvider;
@@ -44,55 +65,22 @@ namespace Architecture
             Console.WriteLine($"{DateTime.Now.ToShortTimeString()} --> {message}");
         }
     }
-
-    public interface IConfig
-    {
-        string FileWriterDestination { get; }
-        int MaxRandomInt { get; }
-        int RandomIntCount { get; }
-        int ConstantValue { get; }
-    }
-
-    public class Config : IConfig
-    {
-        public string FileWriterDestination { get; set; }
-        public int MaxRandomInt { get; set; }
-        public int RandomIntCount { get; set; }
-        public int ConstantValue { get; set; }
-    }
-
     class Program
     {
         static void Main(string[] args)
         {
-            //using(var writer = new LogWriter("ints.txt"))
-            //{
-            //IDataProvider<int> dataProvider = new RandomIntProvider(maxValue: 100, count: 10);
-            ////IManipulator<int, int> manipulator = new Squarer();
-            //IManipulator<int, int> manipulator = new ConstantMultiplier(constantValue: 20);
-            //Processor processor = new Processor(dataProvider, manipulator, writer);
-
-            //processor.Process();
-
-
-            //}
-            IServiceProvider serviceProvider = BuildServiceProvider(args: args);
-            Processor processor = serviceProvider.GetService<Processor>();
-            processor.Process();
+            Parser.Default.ParseArguments<IOptions>(args).WithParsed<IOptions>(o => {
+                IServiceProvider serviceProvider = BuildServiceProvider(options: o);
+                Processor processor = serviceProvider.GetService<Processor>();
+                processor.Process();
+            });
         }
 
-        static IServiceProvider BuildServiceProvider(string[] args)
+        static IServiceProvider BuildServiceProvider(IOptions options)
         {
             IServiceCollection collection = new ServiceCollection();
 
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddJsonFile("appSettings.json", optional: false)
-                .AddCommandLine(args: args)
-                .Build();
-
-            IConfig config = configuration.Get<Config>();
-
-            collection.AddSingleton<IConfig>(config);
+            collection.AddSingleton<IOptions>(options);
             collection.AddTransient<ILogger, Logger>();
             collection.AddSingleton<IDataProvider<int>, RandomIntProvider>();
             collection.AddTransient<IManipulator<int, int>, ConstantMultiplier>();
